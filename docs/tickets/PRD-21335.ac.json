@@ -1,0 +1,111 @@
+[
+  {
+    "id": "TC-EPICOR-001",
+    "ac": "AC1",
+    "text": "Given a client calls tools/list, when the server responds, then it returns exactly the 7 documented epicor_-prefixed tools and no insert/update/procedure-execution tool is present",
+    "type": "auto",
+    "source": "design",
+    "tests": ["tests/test_tools.py::test_tools_list_matches_v1_read_only_surface"]
+  },
+  {
+    "id": "TC-EPICOR-002",
+    "ac": "AC2",
+    "text": "Given a /mcp request with neither X-Epicor-Email nor X-Epicor-Pat set, when the server receives it, then it returns 401 listing both header names and no call reaches CData",
+    "type": "auto",
+    "source": "design",
+    "tests": ["tests/test_middleware.py::test_missing_both_credential_headers_returns_401"]
+  },
+  {
+    "id": "TC-EPICOR-003",
+    "ac": "AC2",
+    "text": "Given a /mcp request with X-Epicor-Email set but X-Epicor-Pat missing, when the server receives it, then it returns 401 listing the missing header",
+    "type": "auto",
+    "source": "design",
+    "tests": ["tests/test_middleware.py::test_missing_pat_header_returns_401"]
+  },
+  {
+    "id": "TC-EPICOR-004",
+    "ac": "AC3",
+    "text": "Given valid credentials and a mocked CData SELECT response, when epicor_query_data is called with no explicit limit, then rows are returned as compact JSON with limit defaulting to 50 and the body under 20,000 characters",
+    "type": "auto",
+    "source": "design",
+    "tests": ["tests/test_tools.py::test_query_data_defaults_and_shape"]
+  },
+  {
+    "id": "TC-EPICOR-005",
+    "ac": "AC3",
+    "text": "Given a mocked CData query result larger than 20,000 characters, when epicor_query_data processes it, then the result is truncated and has_more is set to true",
+    "type": "auto",
+    "source": "design",
+    "tests": ["tests/test_tools.py::test_query_data_truncates_oversized_result"]
+  },
+  {
+    "id": "TC-EPICOR-006",
+    "ac": "AC3",
+    "text": "Given a real CData Connect AI account with an Epicor Kinetic connection configured, when epicor_query_data runs the same SELECT against the live tenant, then it returns real Epicor rows in the shape the mocked test expects",
+    "type": "manual",
+    "source": "design",
+    "steps": [
+      "Obtain a real CData Connect AI account email + PAT with an Epicor Kinetic connection already configured",
+      "Run the service locally with those credentials in X-Epicor-Email / X-Epicor-Pat",
+      "Call epicor_query_data with a simple SELECT against a known Epicor Kinetic table"
+    ],
+    "expect": "Rows are returned as compact JSON matching the shape validated by TC-EPICOR-004/005 against the mocked transport",
+    "result": "untested",
+    "notes": "Needs a real vendor account (CData Connect AI + Epicor Kinetic connection) -- not available to DEV01 in this environment. Not a blocker per references/mcp-track.md 2.5; to be run by the dev leg or QA once an account is available."
+  },
+  {
+    "id": "TC-EPICOR-007",
+    "ac": "AC4",
+    "text": "Given valid credentials and mocked CData getCatalogs/getSchemas/getTables/getColumns responses, when the corresponding epicor_list_* tools are called, then each maps the response into the trimmed name/type/parent shape",
+    "type": "auto",
+    "source": "design",
+    "tests": ["tests/test_tools.py::test_discovery_tools_trim_cdata_metadata"]
+  },
+  {
+    "id": "TC-EPICOR-008",
+    "ac": "AC4",
+    "text": "Given a real CData Connect AI account with an Epicor Kinetic connection configured, when the epicor_list_* discovery tools are called against the live tenant, then they return that tenant's actual Epicor Kinetic catalog/schema/table/column names",
+    "type": "manual",
+    "source": "design",
+    "steps": [
+      "Using the same real account as TC-EPICOR-006",
+      "Call epicor_list_catalogs, then epicor_list_schemas for a returned catalog, then epicor_list_tables, then epicor_list_columns for a returned table"
+    ],
+    "expect": "Each call returns real Epicor Kinetic names the tenant recognizes, in the trimmed shape validated by TC-EPICOR-007 against the mocked transport",
+    "result": "untested",
+    "notes": "Needs a real vendor account -- not available to DEV01 in this environment. Not a blocker per references/mcp-track.md 2.5."
+  },
+  {
+    "id": "TC-EPICOR-009",
+    "ac": "AC5",
+    "text": "Given valid credentials and a mocked CData search_context response, when epicor_search_context is called with a natural-language question, then it returns the candidate datasets/fields the mocked response lists",
+    "type": "auto",
+    "source": "design",
+    "tests": ["tests/test_tools.py::test_search_context_returns_candidates"]
+  },
+  {
+    "id": "TC-EPICOR-010",
+    "ac": "AC6",
+    "text": "Given valid credentials and mocked CData getStarted/getInstructions responses, when epicor_get_started is called, then it returns non-empty combined text from both",
+    "type": "auto",
+    "source": "design",
+    "tests": ["tests/test_tools.py::test_get_started_combines_both_sources"]
+  },
+  {
+    "id": "TC-EPICOR-011",
+    "ac": "AC7",
+    "text": "Given mocked CData responses with HTTP 401/403, 400/422, 429, and 5xx/timeout, when any tool call hits each, then the response is the standard error envelope with code unauthorized / invalid_argument / rate_limited (retryable=true) / upstream_error (retryable=true) respectively, and no exception is raised out of the tool layer",
+    "type": "auto",
+    "source": "design",
+    "tests": ["tests/test_tools.py::test_error_status_codes_map_to_envelope"]
+  },
+  {
+    "id": "TC-EPICOR-012",
+    "ac": "AC8",
+    "text": "Given two concurrent requests carrying different X-Epicor-Email/X-Epicor-Pat pairs, when both are in flight at the same time, then each reaches the mocked CData transport with its own Basic-auth header and neither request's captured header matches the other's credentials",
+    "type": "auto",
+    "source": "design",
+    "tests": ["tests/test_middleware.py::test_concurrent_requests_keep_credentials_isolated"]
+  }
+]
