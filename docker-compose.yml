@@ -1,0 +1,6 @@
+services:
+  epicor-kinetic-mcp:
+    build: .
+    image: epicor-kinetic-mcp:local
+    ports:
+      - "8080:8080"

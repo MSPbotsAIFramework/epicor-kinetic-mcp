@@ -5,7 +5,9 @@
     "text": "Given a client calls tools/list, when the server responds, then it returns exactly the 7 documented epicor_-prefixed tools and no insert/update/procedure-execution tool is present",
     "type": "auto",
     "source": "design",
-    "tests": ["tests/test_tools.py::test_tools_list_matches_v1_read_only_surface"]
+    "tests": ["tests/test_tools.py::test_tools_list_matches_v1_read_only_surface"],
+    "result": "pass",
+    "evidence": "uv run pytest -q: tests/test_tools.py::test_tools_list_matches_v1_read_only_surface passed; reconfirmed live via curl tools/list with placeholder headers -> 200, 7 epicor_-prefixed tool names, see docs/tickets/PRD-21335.md Self-test step 3"
   },
   {
     "id": "TC-EPICOR-002",
@@ -13,7 +15,9 @@
     "text": "Given a /mcp request with neither X-Epicor-Email nor X-Epicor-Pat set, when the server receives it, then it returns 401 listing both header names and no call reaches CData",
     "type": "auto",
     "source": "design",
-    "tests": ["tests/test_middleware.py::test_missing_both_credential_headers_returns_401"]
+    "tests": ["tests/test_middleware.py::test_missing_both_credential_headers_returns_401"],
+    "result": "pass",
+    "evidence": "uv run pytest -q passed; reconfirmed live via curl tools/list with no credential headers -> HTTP 401, see docs/tickets/PRD-21335.md Self-test step 2"
   },
   {
     "id": "TC-EPICOR-003",
@@ -21,7 +25,9 @@
     "text": "Given a /mcp request with X-Epicor-Email set but X-Epicor-Pat missing, when the server receives it, then it returns 401 listing the missing header",
     "type": "auto",
     "source": "design",
-    "tests": ["tests/test_middleware.py::test_missing_pat_header_returns_401"]
+    "tests": ["tests/test_middleware.py::test_missing_pat_header_returns_401"],
+    "result": "pass",
+    "evidence": "uv run pytest -q: tests/test_middleware.py::test_missing_pat_header_returns_401 passed"
   },
   {
     "id": "TC-EPICOR-004",
@@ -29,7 +35,9 @@
     "text": "Given valid credentials and a mocked CData SELECT response, when epicor_query_data is called with no explicit limit, then rows are returned as compact JSON with limit defaulting to 50 and the body under 20,000 characters",
     "type": "auto",
     "source": "design",
-    "tests": ["tests/test_tools.py::test_query_data_defaults_and_shape"]
+    "tests": ["tests/test_tools.py::test_query_data_defaults_and_shape"],
+    "result": "pass",
+    "evidence": "uv run pytest -q: tests/test_tools.py::test_query_data_defaults_and_shape passed"
   },
   {
     "id": "TC-EPICOR-005",
@@ -37,7 +45,9 @@
     "text": "Given a mocked CData query result larger than 20,000 characters, when epicor_query_data processes it, then the result is truncated and has_more is set to true",
     "type": "auto",
     "source": "design",
-    "tests": ["tests/test_tools.py::test_query_data_truncates_oversized_result"]
+    "tests": ["tests/test_tools.py::test_query_data_truncates_oversized_result"],
+    "result": "pass",
+    "evidence": "uv run pytest -q: tests/test_tools.py::test_query_data_truncates_oversized_result passed"
   },
   {
     "id": "TC-EPICOR-006",
@@ -52,7 +62,7 @@
     ],
     "expect": "Rows are returned as compact JSON matching the shape validated by TC-EPICOR-004/005 against the mocked transport",
     "result": "untested",
-    "notes": "Needs a real vendor account (CData Connect AI + Epicor Kinetic connection) -- not available to DEV01 in this environment. Not a blocker per references/mcp-track.md 2.5; to be run by the dev leg or QA once an account is available."
+    "notes": "Needs a real vendor account (CData Connect AI + Epicor Kinetic connection) -- not available to DEV01 in this environment. Not a blocker per references/mcp-track.md 2.5/3. A real (invalid-credential) call was made against https://mcp.cloud.cdata.com/mcp during dev self-test and got a genuine 401, confirming the endpoint and transport are real and reachable -- but the success-path row shape is still unconfirmed. To be run by the review leg or QA once an account is available."
   },
   {
     "id": "TC-EPICOR-007",
@@ -60,7 +70,9 @@
     "text": "Given valid credentials and mocked CData getCatalogs/getSchemas/getTables/getColumns responses, when the corresponding epicor_list_* tools are called, then each maps the response into the trimmed name/type/parent shape",
     "type": "auto",
     "source": "design",
-    "tests": ["tests/test_tools.py::test_discovery_tools_trim_cdata_metadata"]
+    "tests": ["tests/test_tools.py::test_discovery_tools_trim_cdata_metadata"],
+    "result": "pass",
+    "evidence": "uv run pytest -q: tests/test_tools.py::test_discovery_tools_trim_cdata_metadata passed. NOTE: the mocked CData field names (CatalogName/SchemaName/TableName/TableType/ColumnName/DataType) are a best-effort match to CData's common ADO.NET/ODBC metadata-view naming, not a response CData has echoed back in this environment -- see docs/tickets/PRD-21335.md Self-test / Handoff."
   },
   {
     "id": "TC-EPICOR-008",
@@ -74,7 +86,7 @@
     ],
     "expect": "Each call returns real Epicor Kinetic names the tenant recognizes, in the trimmed shape validated by TC-EPICOR-007 against the mocked transport",
     "result": "untested",
-    "notes": "Needs a real vendor account -- not available to DEV01 in this environment. Not a blocker per references/mcp-track.md 2.5."
+    "notes": "Needs a real vendor account -- not available to DEV01 in this environment. Not a blocker per references/mcp-track.md 2.5/3. If the real field names differ from the best-effort guess in tools/discovery.py, only that module's _NAME_KEYS/_TYPE_KEYS/_PARENT_KEYS need updating."
   },
   {
     "id": "TC-EPICOR-009",
@@ -82,7 +94,9 @@
     "text": "Given valid credentials and a mocked CData search_context response, when epicor_search_context is called with a natural-language question, then it returns the candidate datasets/fields the mocked response lists",
     "type": "auto",
     "source": "design",
-    "tests": ["tests/test_tools.py::test_search_context_returns_candidates"]
+    "tests": ["tests/test_tools.py::test_search_context_returns_candidates"],
+    "result": "pass",
+    "evidence": "uv run pytest -q: tests/test_tools.py::test_search_context_returns_candidates passed"
   },
   {
     "id": "TC-EPICOR-010",
@@ -90,7 +104,9 @@
     "text": "Given valid credentials and mocked CData getStarted/getInstructions responses, when epicor_get_started is called, then it returns non-empty combined text from both",
     "type": "auto",
     "source": "design",
-    "tests": ["tests/test_tools.py::test_get_started_combines_both_sources"]
+    "tests": ["tests/test_tools.py::test_get_started_combines_both_sources"],
+    "result": "pass",
+    "evidence": "uv run pytest -q: tests/test_tools.py::test_get_started_combines_both_sources passed"
   },
   {
     "id": "TC-EPICOR-011",
@@ -98,7 +114,9 @@
     "text": "Given mocked CData responses with HTTP 401/403, 400/422, 429, and 5xx/timeout, when any tool call hits each, then the response is the standard error envelope with code unauthorized / invalid_argument / rate_limited (retryable=true) / upstream_error (retryable=true) respectively, and no exception is raised out of the tool layer",
     "type": "auto",
     "source": "design",
-    "tests": ["tests/test_tools.py::test_error_status_codes_map_to_envelope"]
+    "tests": ["tests/test_tools.py::test_error_status_codes_map_to_envelope"],
+    "result": "pass",
+    "evidence": "uv run pytest -q: tests/test_tools.py::test_error_status_codes_map_to_envelope passed, parametrized over 401/403/400/422/429/500/503; reconfirmed live with a real 401 from https://mcp.cloud.cdata.com/mcp, see docs/tickets/PRD-21335.md Self-test step 4. Additional dev-sourced coverage for connection errors and JSON-RPC-level errors: test_connection_error_is_upstream_error, test_json_rpc_level_error_maps_to_invalid_argument, test_tool_level_is_error_never_raises (all passed)."
   },
   {
     "id": "TC-EPICOR-012",
@@ -106,6 +124,8 @@
     "text": "Given two concurrent requests carrying different X-Epicor-Email/X-Epicor-Pat pairs, when both are in flight at the same time, then each reaches the mocked CData transport with its own Basic-auth header and neither request's captured header matches the other's credentials",
     "type": "auto",
     "source": "design",
-    "tests": ["tests/test_middleware.py::test_concurrent_requests_keep_credentials_isolated"]
+    "tests": ["tests/test_middleware.py::test_concurrent_requests_keep_credentials_isolated"],
+    "result": "pass",
+    "evidence": "uv run pytest -q: tests/test_middleware.py::test_concurrent_requests_keep_credentials_isolated passed (asyncio.gather of two tool calls with different credentials, captured Authorization headers differ and match each caller)"
   }
 ]
