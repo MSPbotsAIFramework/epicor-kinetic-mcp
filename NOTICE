@@ -1,0 +1,7 @@
+Epicor Kinetic MCP Server
+Copyright 2026 MSPbots.ai
+
+This product is licensed under the Apache License, Version 2.0 (see LICENSE).
+It was written by MSPbots.ai as a thin proxy to CData Connect AI's hosted MCP endpoint
+(https://docs.cloud.cdata.com/en/API/MCP), the documented access path for Epicor Kinetic
+data since Epicor Kinetic itself publishes no single public API specification.
